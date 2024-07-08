@@ -245,6 +245,19 @@ class DepthImageToPointCloudLogic(ScriptedLoadableModuleLogic):
 
     outputVolume.SetAndObservePolyData(polyData)
 
+    # flip correction
+    flippedMatrix = vtk.vtkMatrix4x4()
+    flippedMatrix.SetElement(1,1, -1)
+    correctionTransform = slicer.vtkMRMLLinearTransformNode()
+    correctionTransform.SetName("CorrectionTransform")
+    slicer.mrmlScene.AddNode(correctionTransform)
+    t = slicer.mrmlScene.GetFirstNodeByName("CorrectionTransform")
+    t.SetMatrixTransformToParent(flippedMatrix)
+    t.Modified()
+    outputVolume.SetAndObserveTransformNodeID(t.GetID())
+    outputVolume.HardenTransform()
+    slicer.mrmlScene.RemoveNode(t)
+
     return True
 
 
